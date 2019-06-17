@@ -60,7 +60,7 @@
             "title": {
               "en": "Fan level"
             },
-            "example": "min"
+            "example": "Normal"
           },
           {
             "name": "from_panel",
@@ -87,11 +87,11 @@
         "tokens": [
           {
             "name": "value",
+            "type": "string",
             "title": {
               "en": "Heating"
             },
-            "type": "boolean",
-            "example": false
+            "example": "Off"
           },
           {
             "name": "from_panel",
