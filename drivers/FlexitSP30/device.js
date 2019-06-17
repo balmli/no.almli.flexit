@@ -171,11 +171,7 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
 
         new Homey.FlowCardAction('set_mode')
             .register()
-            .registerRunListener(this.setMode.bind(this));
-    }
-
-    async setMode(args, state) {
-        await this.setCapabilityValue('mode', args.mode).catch(console.error);
+            .registerRunListener((args, state) => args.device.triggerCapabilityListener('mode', args.mode, {}));
     }
 
     async updateLastChangedMode() {
