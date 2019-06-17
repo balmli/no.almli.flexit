@@ -1,0 +1,430 @@
+{
+  "id": "no.almli.flexit",
+  "version": "0.0.1",
+  "compatibility": ">=2.0.5",
+  "sdk": 2,
+  "brandColor": "#CC0000",
+  "name": {
+    "en": "Flexit SP30 panel"
+  },
+  "description": {
+    "en": "App to control Flexit ventilation with SP30 panels."
+  },
+  "category": [
+    "climate"
+  ],
+  "tags": {
+    "en": [
+      "flexit",
+      "sp30",
+      "ventilation"
+    ]
+  },
+  "permissions": [
+    "homey:manager:api"
+  ],
+  "images": {
+    "large": "/assets/images/large.png",
+    "small": "/assets/images/small.png"
+  },
+  "author": {
+    "name": "Bjørnar Almli",
+    "email": "bjornar.almli@gmail.com"
+  },
+  "contributors": {
+    "developers": [
+      {
+        "name": "Bjørnar Almli",
+        "email": "bjornar.almli@gmail.com"
+      }
+    ]
+  },
+  "flow": {
+    "triggers": [
+      {
+        "id": "fan_level_changed",
+        "title": {
+          "en": "Fan level changed"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=FlexitSP30"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "value",
+            "type": "string",
+            "title": {
+              "en": "Fan level"
+            },
+            "example": "min"
+          },
+          {
+            "name": "from_panel",
+            "type": "boolean",
+            "title": {
+              "en": "From panel"
+            },
+            "example": false
+          }
+        ]
+      },
+      {
+        "id": "heating_changed",
+        "title": {
+          "en": "Heating changed"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=FlexitSP30"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "value",
+            "title": {
+              "en": "Heating"
+            },
+            "type": "boolean",
+            "example": false
+          },
+          {
+            "name": "from_panel",
+            "title": {
+              "en": "From panel"
+            },
+            "type": "boolean",
+            "example": false
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "id": "is_fan_level",
+        "title": {
+          "en": "Is fan level"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=FlexitSP30"
+          },
+          {
+            "type": "dropdown",
+            "name": "fan_level",
+            "values": [
+              {
+                "id": "Minimum",
+                "label": {
+                  "en": "Minimum"
+                }
+              },
+              {
+                "id": "Normal",
+                "label": {
+                  "en": "Normal"
+                }
+              },
+              {
+                "id": "Maximum",
+                "label": {
+                  "en": "Maximum"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "is_heating",
+        "title": {
+          "en": "Is heating !{{on|off}}"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=FlexitSP30"
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "set_mode",
+        "title": {
+          "en": "Set mode"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=FlexitSP30"
+          },
+          {
+            "type": "dropdown",
+            "name": "mode",
+            "values": [
+              {
+                "id": "min",
+                "label": {
+                  "en": "Minimum"
+                }
+              },
+              {
+                "id": "normal",
+                "label": {
+                  "en": "Normal"
+                }
+              },
+              {
+                "id": "max",
+                "label": {
+                  "en": "Maximum"
+                }
+              },
+              {
+                "id": "normal_heat",
+                "label": {
+                  "en": "Normal/Heat"
+                }
+              },
+              {
+                "id": "max_heat",
+                "label": {
+                  "en": "Maximum/Heat"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "drivers": [
+    {
+      "id": "FlexitSP30",
+      "name": {
+        "en": "Flexit SP30"
+      },
+      "zwave": {
+        "manufacturerId": 277,
+        "productTypeId": 272,
+        "productId": 1,
+        "productDocumentation": "",
+        "imageRemotePath": "",
+        "learnmode": {
+          "image": "/drivers/FlexitSP30/assets/learnmode.svg",
+          "instruction": {
+            "en": "Press the button on your Z-UNO three times"
+          }
+        },
+        "unlearnmode": {
+          "image": "/drivers/FlexitSP30/assets/learnmode.svg",
+          "instruction": {
+            "en": "Press the button on your Z-UNO three times"
+          }
+        },
+        "associationGroups": [
+        ],
+        "associationGroupsMultiChannel": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "associationGroupsOptions": {
+          "1": {
+            "hint": {
+              "en": "Mode for fan level and heating"
+            }
+          },
+          "2": {
+            "hint": {
+              "en": "Status for fan level"
+            }
+          },
+          "3": {
+            "hint": {
+              "en": "Status for heating"
+            }
+          },
+          "4": {
+            "hint": {
+              "en": "Temperature air from outside reporting"
+            }
+          },
+          "5": {
+            "hint": {
+              "en": "Temperature air to outside reporting"
+            }
+          },
+          "6": {
+            "hint": {
+              "en": "Temperature air to house reporting"
+            }
+          },
+          "7": {
+            "hint": {
+              "en": "Temperature air from house reporting"
+            }
+          }
+        }
+      },
+      "class": "fan",
+      "capabilities": [
+        "mode",
+        "fan_level_report",
+        "heating_report",
+        "measure_temperature.bath",
+        "measure_humidity.bath",
+        "measure_temperature.in",
+        "measure_temperature.out",
+        "measure_temperature.house_in",
+        "measure_temperature.house_out"
+      ],
+      "capabilitiesOptions": {
+        "measure_temperature.bath": {
+          "title": "Temperature bath",
+          "insights": false
+        },
+        "measure_humidity.bath": {
+          "title": "Humidity bath",
+          "insights": false
+        },
+        "measure_temperature.in": {
+          "title": "Air from outside"
+        },
+        "measure_temperature.out": {
+          "title": "Air to outside"
+        },
+        "measure_temperature.house_in": {
+          "title": "Air to house"
+        },
+        "measure_temperature.house_out": {
+          "title": "Air from house"
+        }
+      },
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "Timers"
+          },
+          "children": [
+            {
+              "id": "standard_timer",
+              "type": "text",
+              "label": {
+                "en": "Standard timer"
+              },
+              "value": "60"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Devices"
+          },
+          "children": [
+            {
+              "id": "bathRoomDevice",
+              "type": "text",
+              "label": {
+                "en": "Bathroom device"
+              },
+              "value": "Badet temp"
+            }
+          ]
+        }
+      ],
+      "images": {
+        "large": "/drivers/FlexitSP30/assets/images/large.png",
+        "small": "/drivers/FlexitSP30/assets/images/small.png"
+      }
+    }
+  ],
+  "capabilities": {
+    "mode": {
+      "type": "enum",
+      "title": {
+        "en": "Mode"
+      },
+      "insights": false,
+      "desc": {
+        "en": "Mode"
+      },
+      "values": [
+        {
+          "id": "min",
+          "title": {
+            "en": "Minimum"
+          }
+        },
+        {
+          "id": "normal",
+          "title": {
+            "en": "Normal"
+          }
+        },
+        {
+          "id": "max",
+          "title": {
+            "en": "Maximum"
+          }
+        },
+        {
+          "id": "normal_heat",
+          "title": {
+            "en": "Normal/Heat"
+          }
+        },
+        {
+          "id": "max_heat",
+          "title": {
+            "en": "Maximum/Heat"
+          }
+        }
+      ],
+      "getable": true,
+      "setable": true,
+      "uiComponent": "picker"
+    },
+    "fan_level_report": {
+      "type": "string",
+      "title": {
+        "en": "Fan level"
+      },
+      "insights": false,
+      "desc": {
+        "en": "Fan level"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor"
+    },
+    "heating_report": {
+      "type": "string",
+      "title": {
+        "en": "Heating"
+      },
+      "insights": false,
+      "desc": {
+        "en": "Heating"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor"
+    }
+  }
+}

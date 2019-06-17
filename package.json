@@ -1,0 +1,24 @@
+{
+  "name": "no.almli.flexit",
+  "version": "0.0.1",
+  "description": "Flexit SP30 panel",
+  "main": "app.js",
+  "scripts": {
+    "pretest": "eslint --ignore-path .gitignore app.js lib drivers test",
+    "test": "./node_modules/.bin/mocha --reporter spec",
+    "posttest": "athom app validate --level publish"
+  },
+  "author": "Bjørnar Almli",
+  "license": "ISC",
+  "dependencies": {
+    "homey-meshdriver": "^1.2.32",
+    "athom-api": "^2.1.192"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-datetime": "^1.5.0",
+    "chai-moment": "0.1.0",
+    "eslint": "^5.16.0",
+    "mocha": "^5.2.0"
+  }
+}
