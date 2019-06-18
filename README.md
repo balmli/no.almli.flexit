@@ -6,6 +6,9 @@ Click '[here](https://github.com/balmli/no.almli.flexit.zuno)' for the Z-UNO fir
 
 ## Device: Flexit SP30 
 
+<img src="https://balmli.github.io/no.almli.flexit/app_1.png" width="250" height="541">
+<img src="https://balmli.github.io/no.almli.flexit/app_2.png" width="250" height="541">
+
 #### Sensors
 
 - Fan level status
