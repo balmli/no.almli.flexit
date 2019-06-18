@@ -39,6 +39,11 @@ Click '[here](https://github.com/balmli/no.almli.flexit.zuno)' for the Z-UNO fir
 - Standard timer: keep on for X minutes if switched on
 - Bathroom device: name of the temperature/humidity device on the bathroom
 
+## Disclaimer:
+
+Use at your own risk. I accept no responsibility for any damages caused by using this app.
+
+
 ## Release Notes:
 
 #### 0.0.1

@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "compatibility": ">=2.0.5",
   "sdk": 2,
-  "brandColor": "#CC0000",
+  "brandColor": "#039FE3",
   "name": {
     "en": "Flexit SP30 panel"
   },
@@ -216,8 +216,8 @@
       },
       "zwave": {
         "manufacturerId": 277,
-        "productTypeId": 272,
-        "productId": 1,
+        "productTypeId": 273,
+        "productId": 49344,
         "productDocumentation": "",
         "imageRemotePath": "",
         "learnmode": {
@@ -290,7 +290,10 @@
         "measure_temperature.in",
         "measure_temperature.out",
         "measure_temperature.house_in",
-        "measure_temperature.house_out"
+        "measure_temperature.house_out",
+        "prev_fan_level_report",
+        "usage_normal_per_day",
+        "usage_max_per_day"
       ],
       "capabilitiesOptions": {
         "measure_temperature.bath": {
@@ -318,23 +321,176 @@
         {
           "type": "group",
           "label": {
-            "en": "Timers"
+            "en": "Device specific"
           },
           "children": [
             {
-              "id": "standard_timer",
-              "type": "text",
-              "label": {
-                "en": "Standard timer"
+              "id": "Status_report_interval",
+              "zwave": {
+                "index": 64,
+                "size": 2
               },
-              "value": "60"
+              "type": "number",
+              "attr": {
+                "min": 0,
+                "max": 32767
+              },
+              "value": 30,
+              "label": {
+                "en": "Fan level and heating status report interval (s)"
+              },
+              "hint": {
+                "en": "Time interval between consecutive status reports. \nZ-wave parameter 64 \nRange: 0, 30 - 32767 (s)\nDefault: 60 (s)"
+              }
+            },
+            {
+              "id": "Temperature_report_interval",
+              "zwave": {
+                "index": 65,
+                "size": 2
+              },
+              "type": "number",
+              "attr": {
+                "min": 0,
+                "max": 32767
+              },
+              "value": 60,
+              "label": {
+                "en": "Temperature report interval (s)"
+              },
+              "hint": {
+                "en": "Time interval between consecutive temperature reports. \nZ-wave parameter 65 \nRange: 0, 30 - 32767 (s)\nDefault: 60 (s)"
+              }
+            },
+            {
+              "id": "Temperature_report_threshold",
+              "zwave": {
+                "index": 66,
+                "size": 2
+              },
+              "type": "number",
+              "attr": {
+                "min": 0,
+                "max": 100
+              },
+              "value": 2,
+              "label": {
+                "en": "Temperature report threshold (°C)"
+              },
+              "hint": {
+                "en": "The temperature report will be sent if there is a difference in temperature value from the previous value reported (threshold). \nZ-wave parameter 66 \nRange: 0 - 100 (0 - 10.0 °C)\nDefault: 2 (0.2 °C)"
+              }
+            },
+            {
+              "id": "Relay_duration",
+              "zwave": {
+                "index": 67,
+                "size": 2
+              },
+              "type": "number",
+              "attr": {
+                "min": 50,
+                "max": 5000
+              },
+              "value": 500,
+              "label": {
+                "en": "Relay on duration (ms)"
+              },
+              "hint": {
+                "en": "Duration to keep the relay on when switching. \nZ-wave parameter 67 \nRange: 50 - 5000 \nDefault: 500 (ms)"
+              }
             }
           ]
         },
         {
           "type": "group",
           "label": {
-            "en": "Devices"
+            "en": "Sensor calibration"
+          },
+          "collapsed": true,
+          "children": [
+            {
+              "id": "Temp1_sensor_calibration",
+              "zwave": {
+                "index": 70,
+                "size": 2
+              },
+              "type": "number",
+              "attr": {
+                "min": -400,
+                "max": 400
+              },
+              "value": 0,
+              "label": {
+                "en": "Air from outside temperature sensor calibration (°C)"
+              },
+              "hint": {
+                "en": "Temperature sensor 'Air from outside' calibration. \nZ-wave parameter 70 \nRange: -400 - 400 (-4.0 - 4.0°C)\nDefault: 0"
+              }
+            },
+            {
+              "id": "Temp2_sensor_calibration",
+              "zwave": {
+                "index": 71,
+                "size": 2
+              },
+              "type": "number",
+              "attr": {
+                "min": -400,
+                "max": 400
+              },
+              "value": 0,
+              "label": {
+                "en": "Air to outside temperature sensor calibration (°C)"
+              },
+              "hint": {
+                "en": "Temperature sensor 'Air to outside' calibration. \nZ-wave parameter 71 \nRange: -400 - 400 (-4.0 - 4.0°C)\nDefault: 0"
+              }
+            },
+            {
+              "id": "Temp3_sensor_calibration",
+              "zwave": {
+                "index": 72,
+                "size": 2
+              },
+              "type": "number",
+              "attr": {
+                "min": -400,
+                "max": 400
+              },
+              "value": 0,
+              "label": {
+                "en": "Air to house temperature sensor calibration (°C)"
+              },
+              "hint": {
+                "en": "Temperature sensor 'Air to house' calibration. \nZ-wave parameter 72 \nRange: -400 - 400 (-4.0 - 4.0°C)\nDefault: 0"
+              }
+            },
+            {
+              "id": "Temp4_sensor_calibration",
+              "zwave": {
+                "index": 73,
+                "size": 2
+              },
+              "type": "number",
+              "attr": {
+                "min": -400,
+                "max": 400
+              },
+              "value": 0,
+              "label": {
+                "en": "Air from house temperature sensor calibration (°C)"
+              },
+              "hint": {
+                "en": "Temperature sensor 'Air from house' calibration. \nZ-wave parameter 73 \nRange: -400 - 400 (-4.0 - 4.0°C)\nDefault: 0"
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Bathroom device"
           },
           "children": [
             {
@@ -344,6 +500,21 @@
                 "en": "Bathroom device"
               },
               "value": "Badet temp"
+            },
+            {
+              "id": "bathRoomDevice_report_interval",
+              "type": "number",
+              "attr": {
+                "min": 0,
+                "max": 32767
+              },
+              "value": 60,
+              "label": {
+                "en": "Bathroom device report interval (s)"
+              },
+              "hint": {
+                "en": "Time interval between consecutive bathroom device reports. \nRange: 0, 30 - 32767 (s)\nDefault: 60 (s)"
+              }
             }
           ]
         }
@@ -413,6 +584,16 @@
       "setable": false,
       "uiComponent": "sensor"
     },
+    "prev_fan_level_report": {
+      "type": "string",
+      "title": {
+        "en": "Previous fan level"
+      },
+      "insights": false,
+      "getable": true,
+      "setable": false,
+      "uiComponent": null
+    },
     "heating_report": {
       "type": "string",
       "title": {
@@ -425,6 +606,38 @@
       "getable": true,
       "setable": false,
       "uiComponent": "sensor"
+    },
+    "usage_normal_per_day": {
+      "type": "number",
+      "title": {
+        "en": "Usage 'Normal' per day"
+      },
+      "units": {
+        "en": "s"
+      },
+      "insights": true,
+      "desc": {
+        "en": "Usage 'Normal' per day (seconds)"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": null
+    },
+    "usage_max_per_day": {
+      "type": "number",
+      "title": {
+        "en": "Usage 'Maximum' per day"
+      },
+      "units": {
+        "en": "s"
+      },
+      "insights": true,
+      "desc": {
+        "en": "Usage 'Maximum' per day (seconds)"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": null
     }
   }
 }

@@ -108,6 +108,9 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
                             value: retVal,
                             from_panel: this.modeChangedFromPanel()
                         });
+                        if (capabilityId === 'fan_level_report') {
+                            setTimeout(this.usageLogging.bind(this), 250);
+                        }
                     }
                     return retVal;
                 }
@@ -146,10 +149,19 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
         if (!mode) {
             await this.setCapabilityValue('mode', 'normal').catch(console.error);
         }
+        this.scheduleUsageLogging();
         this.scheduleBathroomDevice();
     }
 
+    async onSettings(oldSettingsObj, newSettingsObj, changedKeysArr, callback) {
+        if (changedKeysArr.includes('bathRoomDevice_report_interval')) {
+            this.scheduleBathroomDevice();
+        }
+        callback(null, true);
+    }
+
     onDeleted() {
+        this.clearScheduleUsageLogging();
         this.clearScheduleBathroomDevice();
         this.log('device deleted');
     }
@@ -163,15 +175,24 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
 
         new Homey.FlowCardCondition('is_fan_level')
             .register()
-            .registerRunListener((args, state) => args.device.getCapabilityValue('fan_level_report') === args.fan_level);
+            .registerRunListener(args => args.device.isFanLevel(args.fan_level));
 
         new Homey.FlowCardCondition('is_heating')
             .register()
-            .registerRunListener((args, state) => args.device.getCapabilityValue('heating_report') === HEATING_STATUS[10] || args.device.getCapabilityValue('heating_report') === HEATING_STATUS[20]);
+            .registerRunListener(args => args.device.isHeating());
 
         new Homey.FlowCardAction('set_mode')
             .register()
-            .registerRunListener((args, state) => args.device.triggerCapabilityListener('mode', args.mode, {}));
+            .registerRunListener(args => args.device.triggerCapabilityListener('mode', args.mode, {}));
+    }
+
+    isFanLevel(fan_level) {
+        return this.getCapabilityValue('fan_level_report') === fan_level;
+    }
+
+    isHeating() {
+        const heating_report = this.getCapabilityValue('heating_report');
+        return heating_report === HEATING_STATUS[10] || heating_report === HEATING_STATUS[20];
     }
 
     async updateLastChangedMode() {
@@ -181,6 +202,47 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
     modeChangedFromPanel() {
         const lastChangedMode = this.getStoreValue('lastChangedMode');
         return lastChangedMode && ((new Date().getTime() - lastChangedMode) > 5000);
+    }
+
+    async scheduleUsageLogging(seconds = 15) {
+        this._usageLoggingTimeout = setTimeout(this.usageLogging.bind(this), seconds * 1000);
+    }
+
+    clearScheduleUsageLogging() {
+        if (this._usageLoggingTimeout) {
+            clearTimeout(this._usageLoggingTimeout);
+            this._usageLoggingTimeout = undefined;
+        }
+    }
+
+    async usageLogging() {
+        try {
+            this.clearScheduleUsageLogging();
+            const now = new Date();
+            const lastUsageLogging = this.getStoreValue('lastUsageLogging');
+            await this.setStoreValue('lastUsageLogging', now);
+            if (lastUsageLogging) {
+                const timing = Math.round((now.getTime() - lastUsageLogging.getTime()) / 1000);
+
+                const prev_fan_level = this.getCapabilityValue('prev_fan_level_report');
+                const fan_level = this.getCapabilityValue('fan_level_report');
+                await this.setCapabilityValue('prev_fan_level_report', fan_level);
+
+                this.log(`usageLogging: ${prev_fan_level} -> ${fan_level}: ${timing}`);
+
+                const newDay = lastUsageLogging.getDate() !== now.getDate();
+
+                if (prev_fan_level === FAN_LEVEL_STATUS[2]) {
+                    const usageNormal = this.getCapabilityValue('usage_normal_per_day');
+                    await this.setCapabilityValue('usage_normal_per_day', newDay ? 0 : ((usageNormal ? usageNormal : 0) + timing));
+                } else if (prev_fan_level === FAN_LEVEL_STATUS[3]) {
+                    const usageMax = this.getCapabilityValue('usage_max_per_day');
+                    await this.setCapabilityValue('usage_max_per_day', newDay ? 0 : ((usageMax ? usageMax : 0) + timing));
+                }
+            }
+        } finally {
+            this.scheduleUsageLogging();
+        }
     }
 
     async getApi() {
@@ -199,8 +261,13 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
         }
     }
 
-    scheduleBathroomDevice(seconds = 60) {
-        this._bathroomDeviceTimeout = setTimeout(this.refreshBathroomDevice.bind(this), seconds * 1000);
+    async scheduleBathroomDevice() {
+        this.clearScheduleBathroomDevice();
+        let settings = await this.getSettings();
+        let seconds = settings.bathRoomDevice_report_interval;
+        if (seconds >= 30) {
+            this._bathroomDeviceTimeout = setTimeout(this.refreshBathroomDevice.bind(this), seconds * 1000);
+        }
     }
 
     clearScheduleBathroomDevice() {
