@@ -1,6 +1,6 @@
 {
   "name": "no.almli.flexit",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Flexit SP30 panel",
   "main": "app.js",
   "scripts": {

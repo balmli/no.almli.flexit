@@ -5,5 +5,4 @@ const {Driver} = Homey;
 
 module.exports = class FlexitSP30Driver extends Driver {
 
-
 };

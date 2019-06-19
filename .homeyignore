@@ -1,5 +1,8 @@
 .git
 .gitignore
+.eslintrc.json
+*.iml
+.idea
 docs/
 test/
 test2/

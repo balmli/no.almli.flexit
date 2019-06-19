@@ -1,50 +1,20 @@
 'use strict';
 
 const Homey = require('homey'),
-    {HomeyAPI} = require('athom-api');
+    {HomeyAPI} = require('athom-api'),
+    modes = require('../../lib/modes');
 
 const ZwaveDevice = require('homey-meshdriver').ZwaveDevice;
-
-const MODES = {
-    'undefined': 0,
-    'min': 1,
-    'normal': 2,
-    'max': 3,
-    'undefined_heat': 10,
-    'min_heat': 11,
-    'normal_heat': 12,
-    'max_heat': 13,
-    'undefined_heat_on': 20,
-    'min_heat_on': 21,
-    'normal_heat_on': 22,
-    'max_heat_on': 23
-};
-
-let MODES_INVERTED = {};
-for (const [key, value] of Object.entries(MODES)) {
-    MODES_INVERTED[value] = key;
-}
-MODES_INVERTED[0] = 'normal';
-
-const FAN_LEVEL_STATUS = {
-    0: 'Undefined',
-    1: 'Minimum',
-    2: 'Normal',
-    3: 'Maximum'
-};
-
-const HEATING_STATUS = {
-    0: 'Off',
-    10: 'Heating',
-    20: 'Heating on'
-};
 
 module.exports = class FlexitSP30Device extends ZwaveDevice {
 
     async onInit() {
+        this._fanLevelChangedTrigger = undefined;
+        this._heatingChangedTrigger = undefined;
         super.onInit();
         await this.initDevice();
         this.registerFlowCards();
+        this.log(`device initialized: ${this.getData().id}`);
     }
 
     async onMeshInit() {
@@ -62,7 +32,7 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
                 this.log('mode setParser', value);
                 this.updateLastChangedMode();
                 return {
-                    Value: MODES[value] ? MODES[value] : 0
+                    Value: modes.MODES[value] ? modes.MODES[value] : 0
                 };
             },
             report: 'SWITCH_MULTILEVEL_REPORT',
@@ -70,7 +40,7 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
                 if (report &&
                     report.hasOwnProperty('Value (Raw)')) {
                     const value = report['Value (Raw)'][0];
-                    const retVal = MODES_INVERTED[value] ? MODES_INVERTED[value] : null;
+                    const retVal = modes.MODES_INVERTED[value] ? modes.MODES_INVERTED[value] : null;
                     this.log('mode reportParser', value, retVal);
                     return retVal;
                 }
@@ -78,12 +48,23 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
             }
         });
 
-        this.addSensorCapability('fan_level_report', FAN_LEVEL_STATUS, this._fanLevelChangedTrigger, 1);
-        this.addSensorCapability('heating_report', HEATING_STATUS, this._heatingChangedTrigger, 2);
+        this.addSensorCapability('fan_level_report', modes.FAN_LEVEL_STATUS, this._fanLevelChangedTrigger, 1);
+        this.addSensorCapability('heating_report', modes.HEATING_STATUS, this._heatingChangedTrigger, 2);
         this.addTemperatureCapability('measure_temperature.in', 3);
         this.addTemperatureCapability('measure_temperature.out', 4);
         this.addTemperatureCapability('measure_temperature.house_in', 5);
         this.addTemperatureCapability('measure_temperature.house_out', 6);
+
+        /*
+        await this.configurationSet({index: 64, size: 2}, 30);  // Status report interval
+        await this.configurationSet({index: 65, size: 2}, 60);  // Temperature report interval
+        await this.configurationSet({index: 66, size: 2}, 2);   // Temperature report threshold
+        await this.configurationSet({index: 67, size: 2}, 500); // Relay duration
+        await this.configurationSet({index: 70, size: 2}, 0);   // Temp1 sensor calibration
+        await this.configurationSet({index: 71, size: 2}, 0);   // Temp2 sensor calibration
+        await this.configurationSet({index: 72, size: 2}, 0);   // Temp3 sensor calibration
+        await this.configurationSet({index: 73, size: 2}, 0);   // Temp4 sensor calibration
+        */
     }
 
     addSensorCapability(capabilityId, mapping, trigger, multiChannelNodeId) {
@@ -103,13 +84,12 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
                 if (report &&
                     report.hasOwnProperty('Sensor Value (Parsed)')) {
                     const retVal = mapping[report['Sensor Value (Parsed)']];
-                    if (trigger && this.getCapabilityValue(capabilityId) !== retVal) {
-                        trigger.trigger(this, {
-                            value: retVal,
-                            from_panel: this.modeChangedFromPanel()
-                        });
-                        if (capabilityId === 'fan_level_report') {
-                            setTimeout(this.usageLogging.bind(this), 250);
+                    if (this.getCapabilityValue(capabilityId) !== retVal) {
+                        if (trigger) {
+                            trigger.trigger(this, {
+                                value: retVal,
+                                from_panel: this.modeChangedFromPanel()
+                            });
                         }
                     }
                     return retVal;
@@ -147,21 +127,23 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
     async initDevice() {
         const mode = this.getCapabilityValue('mode');
         if (!mode) {
-            await this.setCapabilityValue('mode', 'normal').catch(console.error);
+            await this.setCapabilityValue('mode', 'Normal_Off').catch(console.error);
         }
-        this.scheduleUsageLogging();
         this.scheduleBathroomDevice();
     }
 
-    async onSettings(oldSettingsObj, newSettingsObj, changedKeysArr, callback) {
+    async onSettings(oldSettingsObj, newSettingsObj, changedKeysArr) {
+        await super.onSettings(oldSettingsObj, newSettingsObj, changedKeysArr);
         if (changedKeysArr.includes('bathRoomDevice_report_interval')) {
             this.scheduleBathroomDevice();
         }
-        callback(null, true);
+    }
+
+    async onAdded() {
+        this.log(`device added: ${this.getData().id}`);
     }
 
     onDeleted() {
-        this.clearScheduleUsageLogging();
         this.clearScheduleBathroomDevice();
         this.log('device deleted');
     }
@@ -192,7 +174,7 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
 
     isHeating() {
         const heating_report = this.getCapabilityValue('heating_report');
-        return heating_report === HEATING_STATUS[10] || heating_report === HEATING_STATUS[20];
+        return heating_report === modes.HEATING_STATUS[10] || heating_report === modes.HEATING_STATUS[20];
     }
 
     async updateLastChangedMode() {
@@ -202,47 +184,6 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
     modeChangedFromPanel() {
         const lastChangedMode = this.getStoreValue('lastChangedMode');
         return lastChangedMode && ((new Date().getTime() - lastChangedMode) > 5000);
-    }
-
-    async scheduleUsageLogging(seconds = 15) {
-        this._usageLoggingTimeout = setTimeout(this.usageLogging.bind(this), seconds * 1000);
-    }
-
-    clearScheduleUsageLogging() {
-        if (this._usageLoggingTimeout) {
-            clearTimeout(this._usageLoggingTimeout);
-            this._usageLoggingTimeout = undefined;
-        }
-    }
-
-    async usageLogging() {
-        try {
-            this.clearScheduleUsageLogging();
-            const now = new Date();
-            const lastUsageLogging = this.getStoreValue('lastUsageLogging');
-            await this.setStoreValue('lastUsageLogging', now);
-            if (lastUsageLogging) {
-                const timing = Math.round((now.getTime() - lastUsageLogging.getTime()) / 1000);
-
-                const prev_fan_level = this.getCapabilityValue('prev_fan_level_report');
-                const fan_level = this.getCapabilityValue('fan_level_report');
-                await this.setCapabilityValue('prev_fan_level_report', fan_level);
-
-                this.log(`usageLogging: ${prev_fan_level} -> ${fan_level}: ${timing}`);
-
-                const newDay = lastUsageLogging.getDate() !== now.getDate();
-
-                if (prev_fan_level === FAN_LEVEL_STATUS[2]) {
-                    const usageNormal = this.getCapabilityValue('usage_normal_per_day');
-                    await this.setCapabilityValue('usage_normal_per_day', newDay ? 0 : ((usageNormal ? usageNormal : 0) + timing));
-                } else if (prev_fan_level === FAN_LEVEL_STATUS[3]) {
-                    const usageMax = this.getCapabilityValue('usage_max_per_day');
-                    await this.setCapabilityValue('usage_max_per_day', newDay ? 0 : ((usageMax ? usageMax : 0) + timing));
-                }
-            }
-        } finally {
-            this.scheduleUsageLogging();
-        }
     }
 
     async getApi() {
