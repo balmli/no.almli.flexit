@@ -21,8 +21,6 @@ Use cases:
 
 - Fan level status
 - Heating status
-- Temperature: Bathroom
-- Humidity: Bathroom
 - Temperature: Air from outside
 - Temperature: Air to outside
 - Temperature: Air to house
@@ -59,11 +57,6 @@ Use cases:
 - Air to house temperature sensor calibration (°C)
 - Air from house temperature sensor calibration (°C
 
-#### Bathroom device
-
-- Name of the temperature/humidity device on the bathroom
-- Report interval (s)
-
 
 ## Required hardware and firmware for Z-UNO
 
@@ -77,6 +70,6 @@ Use at your own risk. I accept no responsibility for any damages caused by using
 
 ## Release Notes:
 
-#### 0.0.3
+#### 0.0.4
 
 - Initial version

@@ -1,7 +1,6 @@
 'use strict';
 
 const Homey = require('homey'),
-    {HomeyAPI} = require('athom-api'),
     modes = require('../../lib/modes');
 
 const ZwaveDevice = require('homey-meshdriver').ZwaveDevice;
@@ -37,12 +36,9 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
             },
             report: 'SWITCH_MULTILEVEL_REPORT',
             reportParser: report => {
-                if (report &&
-                    report.hasOwnProperty('Value (Raw)')) {
+                if (report && report.hasOwnProperty('Value (Raw)')) {
                     const value = report['Value (Raw)'][0];
-                    const retVal = modes.MODES_INVERTED[value] ? modes.MODES_INVERTED[value] : null;
-                    this.log('mode reportParser', value, retVal);
-                    return retVal;
+                    return modes.MODES_INVERTED[value] ? modes.MODES_INVERTED[value] : null;
                 }
                 return null;
             }
@@ -55,23 +51,15 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
         this.addTemperatureCapability('measure_temperature.house_in', 5);
         this.addTemperatureCapability('measure_temperature.house_out', 6);
 
-        /*
-        await this.configurationSet({index: 64, size: 2}, 30);  // Status report interval
-        await this.configurationSet({index: 65, size: 2}, 60);  // Temperature report interval
-        await this.configurationSet({index: 66, size: 2}, 2);   // Temperature report threshold
-        await this.configurationSet({index: 67, size: 2}, 500); // Relay duration
-        await this.configurationSet({index: 70, size: 2}, 0);   // Temp1 sensor calibration
-        await this.configurationSet({index: 71, size: 2}, 0);   // Temp2 sensor calibration
-        await this.configurationSet({index: 72, size: 2}, 0);   // Temp3 sensor calibration
-        await this.configurationSet({index: 73, size: 2}, 0);   // Temp4 sensor calibration
-        */
+        this.registerSetting('Device_enabled', value => new Buffer([(value === true) ? 1 : 0]));
+        await this.enableDevice(true);
     }
 
     addSensorCapability(capabilityId, mapping, trigger, multiChannelNodeId) {
         this.registerCapability(capabilityId, 'SENSOR_MULTILEVEL', {
             get: 'SENSOR_MULTILEVEL_GET',
             getOpts: {
-                getOnStart: true
+                getOnStart: false
             },
             getParser: () => ({
                 'Sensor Type': 'Current (version 3)',
@@ -81,16 +69,10 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
             }),
             report: 'SENSOR_MULTILEVEL_REPORT',
             reportParser: report => {
-                if (report &&
-                    report.hasOwnProperty('Sensor Value (Parsed)')) {
+                if (report && report.hasOwnProperty('Sensor Value (Parsed)')) {
                     const retVal = mapping[report['Sensor Value (Parsed)']];
-                    if (this.getCapabilityValue(capabilityId) !== retVal) {
-                        if (trigger) {
-                            trigger.trigger(this, {
-                                value: retVal,
-                                from_panel: this.modeChangedFromPanel()
-                            });
-                        }
+                    if (trigger && this.getCapabilityValue(capabilityId) !== retVal) {
+                        trigger.trigger(this, {value: retVal, from_panel: this.modeChangedFromPanel()});
                     }
                     return retVal;
                 }
@@ -104,7 +86,7 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
         this.registerCapability(capabilityId, 'SENSOR_MULTILEVEL', {
             get: 'SENSOR_MULTILEVEL_GET',
             getOpts: {
-                getOnStart: true
+                getOnStart: false
             },
             getParser: () => ({
                 'Sensor Type': 'Temperature (version 1)',
@@ -114,8 +96,7 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
             }),
             report: 'SENSOR_MULTILEVEL_REPORT',
             reportParser: report => {
-                if (report &&
-                    report.hasOwnProperty('Sensor Value (Parsed)')) {
+                if (report && report.hasOwnProperty('Sensor Value (Parsed)')) {
                     return report['Sensor Value (Parsed)'];
                 }
                 return null;
@@ -129,14 +110,6 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
         if (!mode) {
             await this.setCapabilityValue('mode', 'Normal_Off').catch(console.error);
         }
-        this.scheduleBathroomDevice();
-    }
-
-    async onSettings(oldSettingsObj, newSettingsObj, changedKeysArr) {
-        await super.onSettings(oldSettingsObj, newSettingsObj, changedKeysArr);
-        if (changedKeysArr.includes('bathRoomDevice_report_interval')) {
-            this.scheduleBathroomDevice();
-        }
     }
 
     async onAdded() {
@@ -144,8 +117,13 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
     }
 
     onDeleted() {
-        this.clearScheduleBathroomDevice();
-        this.log('device deleted');
+        this.log(`device deleted: ${this.getData().id}`);
+    }
+
+    async enableDevice(enabled) {
+        await this.configurationSet({id: 'Device_enabled'}, enabled);
+        await this.setSettings('Device_enabled', enabled);
+        this.log(`enableDevice: ${enabled ? 'enabled' : 'disabled'}`);
     }
 
     async registerFlowCards() {
@@ -157,24 +135,16 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
 
         new Homey.FlowCardCondition('is_fan_level')
             .register()
-            .registerRunListener(args => args.device.isFanLevel(args.fan_level));
+            .registerRunListener(args => args.device.getCapabilityValue('fan_level_report') === args.fan_level);
 
         new Homey.FlowCardCondition('is_heating')
             .register()
-            .registerRunListener(args => args.device.isHeating());
+            .registerRunListener(args => args.device.getCapabilityValue('heating_report') === modes.HEATING_STATUS[10] ||
+                args.device.getCapabilityValue('heating_report') === modes.HEATING_STATUS[20]);
 
         new Homey.FlowCardAction('set_mode')
             .register()
             .registerRunListener(args => args.device.triggerCapabilityListener('mode', args.mode, {}));
-    }
-
-    isFanLevel(fan_level) {
-        return this.getCapabilityValue('fan_level_report') === fan_level;
-    }
-
-    isHeating() {
-        const heating_report = this.getCapabilityValue('heating_report');
-        return heating_report === modes.HEATING_STATUS[10] || heating_report === modes.HEATING_STATUS[20];
     }
 
     async updateLastChangedMode() {
@@ -184,75 +154,6 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
     modeChangedFromPanel() {
         const lastChangedMode = this.getStoreValue('lastChangedMode');
         return lastChangedMode && ((new Date().getTime() - lastChangedMode) > 5000);
-    }
-
-    async getApi() {
-        if (!this._api) {
-            this._api = await HomeyAPI.forCurrentHomey();
-        }
-        return this._api;
-    }
-
-    async getDevices() {
-        try {
-            const api = await this.getApi();
-            return await api.devices.getDevices();
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    async scheduleBathroomDevice() {
-        this.clearScheduleBathroomDevice();
-        let settings = await this.getSettings();
-        let seconds = settings.bathRoomDevice_report_interval;
-        if (seconds >= 30) {
-            this._bathroomDeviceTimeout = setTimeout(this.refreshBathroomDevice.bind(this), seconds * 1000);
-        }
-    }
-
-    clearScheduleBathroomDevice() {
-        if (this._bathroomDeviceTimeout) {
-            clearTimeout(this._bathroomDeviceTimeout);
-            this._bathroomDeviceTimeout = undefined;
-        }
-    }
-
-    async refreshBathroomDevice() {
-        const bathroomDevice = await this.getBathroomDevice();
-        if (bathroomDevice) {
-            //this.log('refreshBathroomDevice', bathroomDevice);
-            await this.setCapabilityValue("measure_temperature.bath", bathroomDevice.temperature).catch(console.error);
-            await this.setCapabilityValue("measure_humidity.bath", bathroomDevice.humidity).catch(console.error);
-        } else {
-            this.log('refreshBathroomDevice: no bathroom device');
-        }
-        this.scheduleBathroomDevice();
-    }
-
-    async getBathroomDevice() {
-        let settings = await this.getSettings();
-        let bathRoomDevice = settings.bathRoomDevice;
-        if (!bathRoomDevice) {
-            this.log('getBathroomDevice: no bathRoomDevice in settings');
-            return undefined;
-        }
-        bathRoomDevice = bathRoomDevice.toLowerCase();
-        let devices = await this.getDevices();
-        if (devices) {
-            for (let device in devices) {
-                let d = devices[device];
-                if (d.capabilitiesObj &&
-                    d.name.toLowerCase() === bathRoomDevice &&
-                    (d.capabilitiesObj.measure_temperature || d.capabilitiesObj.measure_humidity)) {
-                    return {
-                        temperature: d.capabilitiesObj.measure_temperature ? d.capabilitiesObj.measure_temperature.value : undefined,
-                        humidity: d.capabilitiesObj.measure_humidity ? d.capabilitiesObj.measure_humidity.value : undefined
-                    }
-                }
-            }
-        }
-        return undefined;
     }
 
 };
