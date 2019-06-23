@@ -51,7 +51,11 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
         this.addTemperatureCapability('measure_temperature.house_in', 5);
         this.addTemperatureCapability('measure_temperature.house_out', 6);
 
-        this.registerSetting('Device_enabled', value => new Buffer([(value === true) ? 1 : 0]));
+        this.registerSetting('Device_enabled', value => {
+            const bufferValue = new Buffer(2);
+            bufferValue.writeUInt16BE(value === true ? 0x0001 : 0x0000);
+            return bufferValue;
+        });
         await this.enableDevice(true);
     }
 
