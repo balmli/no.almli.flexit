@@ -398,6 +398,18 @@
               "label": {
                 "en": "Device enabled"
               }
+            },
+            {
+              "id": "Relays_enabled",
+              "zwave": {
+                "index": 69,
+                "size": 2
+              },
+              "type": "checkbox",
+              "value": false,
+              "label": {
+                "en": "Relays enabled"
+              }
             }
           ]
         },

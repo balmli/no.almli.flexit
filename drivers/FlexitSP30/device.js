@@ -56,6 +56,13 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
             bufferValue.writeUInt16BE(value === true ? 0x0001 : 0x0000);
             return bufferValue;
         });
+
+        this.registerSetting('Relays_enabled', value => {
+            const bufferValue = new Buffer(2);
+            bufferValue.writeUInt16BE(value === true ? 0x0001 : 0x0000);
+            return bufferValue;
+        });
+
         await this.enableDevice(true);
     }
 
