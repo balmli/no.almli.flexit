@@ -144,6 +144,22 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
         this._heatingChangedTrigger = new Homey.FlowCardTriggerDevice('heating_changed');
         this._heatingChangedTrigger.register();
 
+        this.triggerMeasureTemperatureIn = new Homey.FlowCardTriggerDevice('measure_temperature.in_changed');
+        this.triggerMeasureTemperatureIn
+            .register();
+
+        this.triggerMeasureTemperatureOut = new Homey.FlowCardTriggerDevice('measure_temperature.out_changed');
+        this.triggerMeasureTemperatureOut
+            .register();
+
+        this.triggerMeasureTemperatureHouseIn = new Homey.FlowCardTriggerDevice('measure_temperature.house_in_changed');
+        this.triggerMeasureTemperatureHouseIn
+            .register();
+
+        this.triggerMeasureTemperatureHouseOut = new Homey.FlowCardTriggerDevice('measure_temperature.house_out_changed');
+        this.triggerMeasureTemperatureHouseOut
+            .register();
+
         new Homey.FlowCardCondition('is_fan_level')
             .register()
             .registerRunListener(args => args.device.getCapabilityValue('fan_level_report') === args.fan_level);

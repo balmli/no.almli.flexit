@@ -1,6 +1,6 @@
 {
   "id": "no.almli.flexit",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "compatibility": ">=2.0.5",
   "sdk": 2,
   "brandColor": "#039FE3",
@@ -99,6 +99,90 @@
             },
             "type": "boolean",
             "example": false
+          }
+        ]
+      },
+      {
+        "id": "measure_temperature.in_changed",
+        "title": {
+          "en": "The air from outside temperature changed"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=FlexitSP30"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "measure_temperature.in",
+            "title": "temperature",
+            "type": "number",
+            "example": 23.5
+          }
+        ]
+      },
+      {
+        "id": "measure_temperature.out_changed",
+        "title": {
+          "en": "The air to outside temperature changed"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=FlexitSP30"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "measure_temperature.out",
+            "title": "temperature",
+            "type": "number",
+            "example": 23.5
+          }
+        ]
+      },
+      {
+        "id": "measure_temperature.house_in_changed",
+        "title": {
+          "en": "The air to house temperature changed"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=FlexitSP30"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "measure_temperature.house_in",
+            "title": "temperature",
+            "type": "number",
+            "example": 23.5
+          }
+        ]
+      },
+      {
+        "id": "measure_temperature.house_out_changed",
+        "title": {
+          "en": "The air from house temperature changed"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=FlexitSP30"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "measure_temperature.house_out",
+            "title": "temperature",
+            "type": "number",
+            "example": 23.5
           }
         ]
       }

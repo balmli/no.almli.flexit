@@ -30,6 +30,10 @@ Use cases:
 
 - Fan level changed (tokens: value, from_panel)
 - Heating changed (tokens: value, from_panel)
+- Air from outside temperature changed (tokens: temperature)
+- Air to outside temperature changed (tokens: temperature)
+- Air to house temperature changed (tokens: temperature)
+- Air from house temperature changed (tokens: temperature)
 
 #### Conditions
 
@@ -49,6 +53,8 @@ Use cases:
 - Temperature report interval (s)
 - Temperature report threshold (°C)
 - Relay on duration (ms)
+- Device enabled: enable to send status and temperature updates
+- Relays enabled: enable to switch relays
 
 #### Temperature sensor calibration
 
@@ -70,6 +76,6 @@ Use at your own risk. I accept no responsibility for any damages caused by using
 
 ## Release Notes:
 
-#### 0.0.6
+#### 0.0.7
 
 - Initial version
