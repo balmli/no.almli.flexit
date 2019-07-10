@@ -133,7 +133,7 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
 
     async enableDevice(enabled) {
         await this.configurationSet({id: 'Device_enabled'}, enabled);
-        await this.setSettings('Device_enabled', enabled);
+        await this.setSettings({'Device_enabled': enabled});
         this.log(`enableDevice: ${enabled ? 'enabled' : 'disabled'}`);
     }
 
