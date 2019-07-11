@@ -371,8 +371,7 @@
         "measure_temperature.in",
         "measure_temperature.out",
         "measure_temperature.house_in",
-        "measure_temperature.house_out",
-        "prev_fan_level_report"
+        "measure_temperature.house_out"
       ],
       "capabilitiesOptions": {
         "measure_temperature.in": {
@@ -648,16 +647,6 @@
       "setable": false,
       "uiComponent": "sensor",
       "icon": "/drivers/FlexitSP30/assets/images/fan.svg"
-    },
-    "prev_fan_level_report": {
-      "type": "string",
-      "title": {
-        "en": "Previous fan level"
-      },
-      "insights": false,
-      "getable": true,
-      "setable": false,
-      "uiComponent": null
     },
     "heating_report": {
       "type": "string",
