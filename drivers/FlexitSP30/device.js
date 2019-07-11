@@ -107,6 +107,7 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
             }),
             report: 'SENSOR_MULTILEVEL_REPORT',
             reportParser: report => {
+                setTimeout(this.calcHeatEfficiency(), 1000);
                 if (report && report.hasOwnProperty('Sensor Value (Parsed)')) {
                     return report['Sensor Value (Parsed)'];
                 }
@@ -181,6 +182,15 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
     modeChangedFromPanel() {
         const lastChangedMode = this.getStoreValue('lastChangedMode');
         return lastChangedMode && ((new Date().getTime() - lastChangedMode) > 5000);
+    }
+
+    async calcHeatEfficiency() {
+        const q1 = this.getCapabilityValue('measure_temperature.in');
+        const q2 = this.getCapabilityValue('measure_temperature.house_in');
+        const q3 = this.getCapabilityValue('measure_temperature.house_out');
+        const n = q3 - q1 !== 0 ? Math.round(10000 * (q2 - q1) / (q3 - q1)) / 100 : null;
+        this.log(`calcHeatEfficiency: (${q2} - ${q1}) / (${q3} - ${q1}) -> ${n}`);
+        await this.setCapabilityValue('heat_efficiency', n);
     }
 
 };

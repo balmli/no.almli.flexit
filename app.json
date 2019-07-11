@@ -1,6 +1,6 @@
 {
   "id": "no.almli.flexit",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "compatibility": ">=2.0.5",
   "sdk": 2,
   "brandColor": "#039FE3",
@@ -371,7 +371,8 @@
         "measure_temperature.in",
         "measure_temperature.out",
         "measure_temperature.house_in",
-        "measure_temperature.house_out"
+        "measure_temperature.house_out",
+        "heat_efficiency"
       ],
       "capabilitiesOptions": {
         "measure_temperature.in": {
@@ -661,6 +662,18 @@
       "setable": false,
       "uiComponent": "sensor",
       "icon": "/drivers/FlexitSP30/assets/images/heating.svg"
+    },
+    "heat_efficiency": {
+      "type": "number",
+      "title": {
+        "en": "Heat efficiency"
+      },
+      "insights": true,
+      "decimals": 2,
+      "chartType": "spline",
+      "desc": {
+        "en": "Heat efficiency"
+      }
     }
   }
 }
