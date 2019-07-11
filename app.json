@@ -405,12 +405,12 @@
                 "min": 0,
                 "max": 32767
               },
-              "value": 30,
+              "value": 600,
               "label": {
                 "en": "Fan level status report interval (s)"
               },
               "hint": {
-                "en": "Time interval between consecutive status reports. \nZ-wave parameter 64 \nRange: 0, 30 - 32767 (s)\nDefault: 30 (s)"
+                "en": "Time interval between consecutive status reports. \nZ-wave parameter 64 \nRange: 0, 30 - 32767 (s)\nDefault: 600 (s)"
               }
             },
             {
@@ -424,12 +424,12 @@
                 "min": 0,
                 "max": 32767
               },
-              "value": 300,
+              "value": 600,
               "label": {
                 "en": "Temperature report interval (s)"
               },
               "hint": {
-                "en": "Time interval between consecutive temperature reports. \nZ-wave parameter 65 \nRange: 0, 30 - 32767 (s)\nDefault: 300 (s)"
+                "en": "Time interval between consecutive temperature reports. \nZ-wave parameter 65 \nRange: 0, 30 - 32767 (s)\nDefault: 600 (s)"
               }
             },
             {
@@ -443,12 +443,12 @@
                 "min": 0,
                 "max": 1000
               },
-              "value": 40,
+              "value": 20,
               "label": {
                 "en": "Temperature report threshold (°C)"
               },
               "hint": {
-                "en": "The temperature report will be sent if there is a difference in temperature value from the previous value reported (threshold). \nZ-wave parameter 66 \nRange: 0 - 1000 (0 - 10.0 °C)\nDefault: 40 (0.4 °C)"
+                "en": "The temperature report will be sent if there is a difference in temperature value from the previous value reported (threshold). \nZ-wave parameter 66 \nRange: 0 - 1000 (0 - 10.0 °C)\nDefault: 20 (0.2 °C)"
               }
             },
             {
@@ -462,12 +462,12 @@
                 "min": 50,
                 "max": 5000
               },
-              "value": 500,
+              "value": 250,
               "label": {
                 "en": "Relay on duration (ms)"
               },
               "hint": {
-                "en": "Duration to keep the relay on when switching. \nZ-wave parameter 67 \nRange: 50 - 5000 \nDefault: 500 (ms)"
+                "en": "Duration to keep the relay on when switching. \nZ-wave parameter 67 \nRange: 50 - 5000 \nDefault: 250 (ms)"
               }
             },
             {
