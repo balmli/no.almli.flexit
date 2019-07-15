@@ -107,7 +107,7 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
             }),
             report: 'SENSOR_MULTILEVEL_REPORT',
             reportParser: report => {
-                setTimeout(this.calcHeatEfficiency(), 1000);
+                setTimeout(this.calcHeatEfficiency.bind(this), 1000);
                 if (report && report.hasOwnProperty('Sensor Value (Parsed)')) {
                     return report['Sensor Value (Parsed)'];
                 }

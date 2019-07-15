@@ -76,6 +76,6 @@ Use at your own risk. I accept no responsibility for any damages caused by using
 
 ## Release Notes:
 
-#### 0.0.10
+#### 0.0.11
 
 - Initial version
