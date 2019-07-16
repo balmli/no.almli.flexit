@@ -25,6 +25,7 @@ Use cases:
 - Temperature: Air to outside
 - Temperature: Air to house
 - Temperature: Air from house
+- Heat efficiency (%)
 
 #### Triggers
 
