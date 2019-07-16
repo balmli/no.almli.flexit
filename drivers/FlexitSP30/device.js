@@ -173,6 +173,10 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
         new Homey.FlowCardAction('set_mode')
             .register()
             .registerRunListener(args => args.device.triggerCapabilityListener('mode', args.mode, {}));
+
+        new Homey.FlowCardAction('calibrate_temp')
+            .register()
+            .registerRunListener(this.calibrateTemperatureSensors.bind(this));
     }
 
     async updateLastChangedMode() {
@@ -191,6 +195,26 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
         const n = q3 - q1 !== 0 ? Math.round(10000 * (q2 - q1) / (q3 - q1)) / 100 : null;
         this.log(`calcHeatEfficiency: (${q2} - ${q1}) / (${q3} - ${q1}) -> ${n}`);
         await this.setCapabilityValue('heat_efficiency', n);
+    }
+
+    async calibrateTemperatureSensors(args, state) {
+        if (!args.temperature) {
+            throw new Error('Missing temperature');
+        }
+        let settings = await this.getSettings();
+        await this.calibrateTemperatureSensor('measure_temperature.in', 'Temp1_sensor_calibration', args.temperature, settings);
+        await this.calibrateTemperatureSensor('measure_temperature.out', 'Temp2_sensor_calibration', args.temperature, settings);
+        await this.calibrateTemperatureSensor('measure_temperature.house_in', 'Temp3_sensor_calibration', args.temperature, settings);
+        await this.calibrateTemperatureSensor('measure_temperature.house_out', 'Temp4_sensor_calibration', args.temperature, settings);
+    }
+
+    async calibrateTemperatureSensor(capability, settingsProperty, targetTemp, settings) {
+        const currentCalibration = settings[settingsProperty];
+        const realTemperature = this.getCapabilityValue(capability) - currentCalibration / 100;
+        const newCalibration = Math.round(100 * (targetTemp - realTemperature));
+
+        await this.setSettings(JSON.parse(`{ ${settingsProperty}: ${newCalibration} }`));
+        await this.configurationSet({id: settingsProperty}, newCalibration);
     }
 
 };
