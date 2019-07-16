@@ -43,6 +43,7 @@ Use cases:
 #### Actions
 
 - Set mode (Minimum, Normal, Maximum, Normal/Heat, Maximum/Heat)
+- Calibrate temperature sensors
 
 
 ## Advanced settings:
