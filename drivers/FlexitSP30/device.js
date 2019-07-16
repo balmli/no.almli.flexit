@@ -213,7 +213,7 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
         const realTemperature = this.getCapabilityValue(capability) - currentCalibration / 100;
         const newCalibration = Math.round(100 * (targetTemp - realTemperature));
 
-        await this.setSettings(JSON.parse(`{ ${settingsProperty}: ${newCalibration} }`));
+        await this.setSettings(JSON.parse(`{ "${settingsProperty}": ${newCalibration} }`));
         await this.configurationSet({id: settingsProperty}, newCalibration);
     }
 
