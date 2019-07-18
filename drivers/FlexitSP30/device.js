@@ -38,7 +38,9 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
             reportParser: report => {
                 if (report && report.hasOwnProperty('Value (Raw)')) {
                     const value = report['Value (Raw)'][0];
-                    return modes.MODES_INVERTED[value] ? modes.MODES_INVERTED[value] : null;
+                    let parsedValue = modes.MODES_INVERTED[value] ? modes.MODES_INVERTED[value] : null;
+                    this.log('mode reportParser', value, parsedValue);
+                    return parsedValue;
                 }
                 return null;
             }
@@ -70,7 +72,7 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
         this.registerCapability(capabilityId, 'SENSOR_MULTILEVEL', {
             get: 'SENSOR_MULTILEVEL_GET',
             getOpts: {
-                getOnStart: false
+                getOnStart: true
             },
             getParser: () => ({
                 'Sensor Type': 'Current (version 3)',
@@ -85,6 +87,7 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
                     if (trigger && this.getCapabilityValue(capabilityId) !== retVal) {
                         trigger.trigger(this, {value: retVal, from_panel: this.modeChangedFromPanel()});
                     }
+                    this.log(`${capabilityId} reportParser`, report['Sensor Value (Parsed)'], retVal);
                     return retVal;
                 }
                 return null;
@@ -133,8 +136,8 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
     }
 
     async enableDevice(enabled) {
-        await this.configurationSet({id: 'Device_enabled'}, enabled);
-        await this.setSettings({'Device_enabled': enabled});
+        await this.configurationSet({id: 'Device_enabled'}, enabled).catch(console.error);
+        await this.setSettings({'Device_enabled': enabled}).catch(console.error);
         this.log(`enableDevice: ${enabled ? 'enabled' : 'disabled'}`);
     }
 
