@@ -220,4 +220,12 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
         await this.configurationSet({id: settingsProperty}, newCalibration);
     }
 
+    getStatus() {
+        const mode = this.getCapabilityValue('mode');
+        return {
+            descr: modes.MODES_STATUS[mode],
+            running: mode !== 'Minimum_Off' && mode !== 'Minimum_Heating'
+        };
+    }
+
 };
