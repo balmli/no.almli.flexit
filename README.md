@@ -25,6 +25,7 @@ Use cases:
 - Temperature: Air to outside
 - Temperature: Air to house
 - Temperature: Air from house
+- Power (estimated)
 - Heat efficiency (%)
 
 #### Triggers
@@ -78,6 +79,6 @@ Use at your own risk. I accept no responsibility for any damages caused by using
 
 ## Release Notes:
 
-#### 0.0.14
+#### 0.0.15
 
 - Initial version

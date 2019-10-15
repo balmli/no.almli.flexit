@@ -35,11 +35,12 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
                 };
             },
             report: 'SWITCH_MULTILEVEL_REPORT',
-            reportParser: report => {
+            reportParser: async report =>  {
                 if (report && report.hasOwnProperty('Value (Raw)')) {
                     const value = report['Value (Raw)'][0];
                     let parsedValue = modes.MODES_INVERTED[value] ? modes.MODES_INVERTED[value] : null;
                     this.log('mode reportParser', value, parsedValue);
+                    await this.updateMeasurePower(parsedValue);
                     return parsedValue;
                 }
                 return null;
@@ -125,6 +126,9 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
         if (!mode) {
             await this.setCapabilityValue('mode', 'Normal_Off').catch(console.error);
         }
+        if (!this.hasCapability("measure_power")) {
+            this.addCapability("measure_power");
+        }
     }
 
     async onAdded() {
@@ -184,6 +188,12 @@ module.exports = class FlexitSP30Device extends ZwaveDevice {
 
     async updateLastChangedMode() {
         await this.setStoreValue('lastChangedMode', new Date().getTime());
+    }
+
+    async updateMeasurePower(mode) {
+        if (mode) {
+            await this.setCapabilityValue('measure_power', modes.MODES_POWER[mode]);
+        }
     }
 
     modeChangedFromPanel() {
